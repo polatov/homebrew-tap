@@ -1,0 +1,32 @@
+# Audits the cask and installs it on a clean macOS runner.
+name: Test cask
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  install:
+    runs-on: macos-latest
+    steps:
+      - name: Tap this repository
+        run: brew tap polatov/tap "https://github.com/${GITHUB_REPOSITORY}"
+
+      - name: Audit
+        run: brew audit --cask --online polatov/tap/likenotepad
+
+      - name: Install
+        run: brew install --cask polatov/tap/likenotepad
+
+      - name: Check the installed app
+        run: |
+          app="/Applications/LikeNotepad.exe.app"
+          test -d "$app"
+          lipo -archs "$app/Contents/MacOS/notepad-mac"
+          /usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$app/Contents/Info.plist"
+
+      - name: Uninstall
+        run: brew uninstall --cask --zap polatov/tap/likenotepad && test ! -d /Applications/LikeNotepad.exe.app
