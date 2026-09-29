@@ -11,6 +11,10 @@ permissions:
 jobs:
   install:
     runs-on: macos-latest
+    env:
+      # brew audit queries the GitHub API; unauthenticated calls from shared runners hit
+      # the 60-per-hour limit.
+      HOMEBREW_GITHUB_API_TOKEN: ${{ github.token }}
     steps:
       - name: Tap this repository
         run: brew tap polatov/tap "https://github.com/${GITHUB_REPOSITORY}"
